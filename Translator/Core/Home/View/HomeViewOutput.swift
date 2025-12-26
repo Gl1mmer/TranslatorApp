@@ -8,5 +8,8 @@
 import Foundation
 
 protocol HomeViewOutput {
-    func translateText(text: String)
+    func viewIsReady()
+    func translate(text: String)
+    func changeLanguage(of: TranslationBoxMode, to: Language)
+    func addTextToFavorite(text: String)
 }

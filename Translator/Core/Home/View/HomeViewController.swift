@@ -9,38 +9,46 @@ import UIKit
 
 final class HomeViewController: UIViewController {
     
-    lazy var output = HomePresenter(delegate: self)
-//    var output: HomeViewOutput!
+    lazy var output: HomeViewOutput = HomePresenter(delegate: self)
     
-    private lazy var from = BoxView(delegate: self, boxType: 1)
-    private lazy var to = BoxView(delegate: nil, boxType: 2)
-    
-    let placeholderText = "Enter your text"
-    
+    private lazy var translationInputView = TranslationBoxView(delegate: self, mode: .input)
+    private lazy var translationOutputView = TranslationBoxView(delegate: nil, mode: .output)
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "DevHouse iOS"
         setupUI()
+        output.viewIsReady()
     }
 }
 
 extension HomeViewController {
     private func setupUI() {
-        view.addSubview(from)
-        view.addSubview(to)
+        view.addSubview(translationInputView)
+        view.addSubview(translationOutputView)
 
         NSLayoutConstraint.activate([
-            from.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 13),
-            from.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -13),
-            from.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 22),
-            from.heightAnchor.constraint(equalToConstant: 200),
+            translationInputView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 13),
+            translationInputView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -13),
+            translationInputView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 22),
+            translationInputView.heightAnchor.constraint(equalToConstant: 200),
             
-            to.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 13),
-            to.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -13),
-            to.topAnchor.constraint(equalTo: from.bottomAnchor, constant: 5),
-            to.heightAnchor.constraint(equalToConstant: 200)
+            translationOutputView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 13),
+            translationOutputView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -13),
+            translationOutputView.topAnchor.constraint(equalTo: translationInputView.bottomAnchor, constant: 5),
+            translationOutputView.heightAnchor.constraint(equalToConstant: 200)
         ])
     }
+    
+    private func makeLanguageMenu(for mode: TranslationBoxMode, with languages: [Language]) -> UIMenu {
+        let actions = languages.map { language in
+            UIAction(title: language.title) { [weak self] _ in
+                self?.output.changeLanguage(of: mode, to: language)
+            }
+        }
+        return UIMenu(title: "Choose language", children: actions)
+    }
+
 }
 
 extension HomeViewController: UITextViewDelegate {
@@ -54,12 +62,12 @@ extension HomeViewController: UITextViewDelegate {
     
     func textViewDidChange(_ textView: UITextView) {
         print(textView.text ?? "-")
-        output.translateText(text: textView.text)
+        output.translate(text: textView.text)
     }
     
     func textViewDidEndEditing(_ textView: UITextView) {
         if textView.text == "" {
-            textView.text = placeholderText
+//            textView.text = placeholderText
             textView.textColor = .systemGray
         }
         textView.resignFirstResponder()
@@ -67,7 +75,22 @@ extension HomeViewController: UITextViewDelegate {
 }
 
 extension HomeViewController: HomeViewInput {
-    func updateWithTranslatedText(text: String) {
-        to.updateText(text)
+    func updateInputLanguage(_ language: Language) {
+        translationInputView.updateLanguageTitle(language.title)
+        translationInputView.updatePlaceholder(language.placeholder)
+    }
+    
+    func updateOutputLanguage(_ language: Language) {
+        translationOutputView.updateLanguageTitle(language.title)
+        translationOutputView.updatePlaceholder(language.placeholder)
+    }
+    
+    func configureLanguages(_ languages: [Language]) {
+        translationInputView.setLanguageMenu(makeLanguageMenu(for: .input, with: languages))
+        translationOutputView.setLanguageMenu(makeLanguageMenu(for: .output, with: languages))
+    }
+    
+    func showTranslatedText(_ text: String) {
+        translationOutputView.updateText(text)
     }
 }

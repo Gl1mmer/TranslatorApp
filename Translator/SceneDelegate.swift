@@ -18,6 +18,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         
         let homeNC = UINavigationController(rootViewController: HomeViewController())
+        
+        
         let udm = UserDefManager()
         let profileVC = ProfileViewController()
         let ProfilePresenter = ProfilePresenter(input: profileVC, networkServ: UnsplashService(), userDefManager: udm)

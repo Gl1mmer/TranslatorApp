@@ -8,5 +8,8 @@
 import UIKit
 
 protocol HomeViewInput: AnyObject {
-    func updateWithTranslatedText(text: String)
+    func configureLanguages(_ languages: [Language])
+    func updateInputLanguage(_ language: Language)
+    func updateOutputLanguage(_ language: Language)
+    func showTranslatedText(_ text: String)
 }

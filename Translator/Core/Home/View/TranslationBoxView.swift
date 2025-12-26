@@ -6,7 +6,14 @@
 //
 import UIKit
 
-class BoxView: UIView {
+enum TranslationBoxMode {
+    case input
+    case output
+}
+
+class TranslationBoxView: UIView {
+    
+    private let mode: TranslationBoxMode
         
     private let languageButton = {
         $0.setTitle("English (USA)", for: .normal)
@@ -22,6 +29,7 @@ class BoxView: UIView {
         $0.setImage(UIImage(systemName: "bookmark"), for: .normal)
         $0.tintColor = .black
         $0.titleLabel?.font = .boldSystemFont(ofSize: 12)
+        $0.contentMode = .scaleAspectFill
         $0.translatesAutoresizingMaskIntoConstraints = false
         $0.setContentHuggingPriority(.required, for: .horizontal)
         $0.setContentHuggingPriority(.required, for: .vertical)
@@ -38,45 +46,49 @@ class BoxView: UIView {
     }(UITextView())
     
 
-    init(delegate: UITextViewDelegate?, boxType: Int) {
+    init(delegate: UITextViewDelegate?, mode: TranslationBoxMode) {
+        self.mode = mode
         super.init(frame: .zero)
         textView.delegate = delegate
         setupUI()
-        if boxType == 2 {
-            textView.isEditable = false
-        }
     }
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-    }
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-}
-
-extension BoxView {
     
     private func setupUI() {
         backgroundColor = .systemGray5
         layer.cornerRadius = 20
         clipsToBounds = true
         translatesAutoresizingMaskIntoConstraints = false
+        textView.isUserInteractionEnabled = (mode == .output) ? false : true
 
+        setupSubviews()
+        
+    }
+    
+    private func setupSubviews() {
         addSubview(languageButton)
-        addSubview(bookmarkButton)
         addSubview(textView)
+
+        if mode == .input {
+            addSubview(bookmarkButton)
+            NSLayoutConstraint.activate([
+                bookmarkButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -27),
+                bookmarkButton.topAnchor.constraint(equalTo: topAnchor, constant: 22),
+                bookmarkButton.widthAnchor.constraint(equalToConstant: 24),
+                bookmarkButton.heightAnchor.constraint(equalToConstant: 24),
+            ])
+        }
         
         NSLayoutConstraint.activate([
             languageButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 27),
             languageButton.topAnchor.constraint(equalTo: topAnchor, constant: 16),
             
-            bookmarkButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -27),
-            bookmarkButton.topAnchor.constraint(equalTo: topAnchor, constant: 22),
-            
             textView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 27),
-            textView.trailingAnchor.constraint(equalTo: bookmarkButton.leadingAnchor, constant: -16),
-            textView.topAnchor.constraint(equalTo: languageButton.bottomAnchor, constant: 16),
+            textView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -67),
+            textView.topAnchor.constraint(equalTo: topAnchor, constant: 62),
             textView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
         ])
     }
@@ -84,5 +96,22 @@ extension BoxView {
     func updateText(_ text: String) {
         textView.text = text
     }
+    
+    func updateLanguageTitle(_ title: String) {
+        languageButton.setTitle(title, for: .normal)
+    }
+
+    func updatePlaceholder(_ text: String) {
+        if textView.textColor == .systemGray {
+            textView.text = text
+        }
+    }
+    
+    func setLanguageMenu(_ menu: UIMenu) {
+        languageButton.menu = menu
+        languageButton.showsMenuAsPrimaryAction = true
+    }
+    
 }
+
 
