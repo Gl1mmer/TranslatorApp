@@ -11,15 +11,23 @@ final class HomeViewController: UIViewController {
     
     lazy var output: HomeViewOutput = HomePresenter(delegate: self)
     
-    private lazy var translationInputView = TranslationBoxView(delegate: self, mode: .input)
-    private lazy var translationOutputView = TranslationBoxView(delegate: nil, mode: .output)
+    private lazy var translationInputView = TranslationBoxView(mode: .input, delegate: self)
+    private lazy var translationOutputView = TranslationBoxView(mode: .output, delegate: self)
         
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "DevHouse iOS"
         setupUI()
         output.viewIsReady()
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+            tap.cancelsTouchesInView = false // important
+            view.addGestureRecognizer(tap)
     }
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+
 }
 
 extension HomeViewController {
@@ -51,46 +59,26 @@ extension HomeViewController {
 
 }
 
-extension HomeViewController: UITextViewDelegate {
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.textColor == .systemGray {
-            textView.text = ""
-            textView.textColor = .black
-        }
-        textView.becomeFirstResponder()
-    }
-    
-    func textViewDidChange(_ textView: UITextView) {
-        print(textView.text ?? "-")
-        output.translate(text: textView.text)
-    }
-    
-    func textViewDidEndEditing(_ textView: UITextView) {
-        if textView.text == "" {
-//            textView.text = placeholderText
-            textView.textColor = .systemGray
-        }
-        textView.resignFirstResponder()
-    }
-}
-
 extension HomeViewController: HomeViewInput {
+    func configureLanguages(_ languages: [Language]) {
+        translationInputView.configureLanguageMenu(makeLanguageMenu(for: .input, with: languages))
+        translationOutputView.configureLanguageMenu(makeLanguageMenu(for: .output, with: languages))
+    }
     func updateInputLanguage(_ language: Language) {
-        translationInputView.updateLanguageTitle(language.title)
-        translationInputView.updatePlaceholder(language.placeholder)
+        translationInputView.setLanguageTitle(language.title)
     }
     
     func updateOutputLanguage(_ language: Language) {
-        translationOutputView.updateLanguageTitle(language.title)
-        translationOutputView.updatePlaceholder(language.placeholder)
+        translationOutputView.setLanguageTitle(language.title)
     }
-    
-    func configureLanguages(_ languages: [Language]) {
-        translationInputView.setLanguageMenu(makeLanguageMenu(for: .input, with: languages))
-        translationOutputView.setLanguageMenu(makeLanguageMenu(for: .output, with: languages))
-    }
-    
     func showTranslatedText(_ text: String) {
-        translationOutputView.updateText(text)
+        translationOutputView.setText(text)
     }
+}
+
+extension HomeViewController: TranslationBoxProtocol {
+    func translationBoxDidChangeText(text: String) {
+        output.translate(text: text)
+    }
+    
 }

@@ -11,12 +11,16 @@ enum TranslationBoxMode {
     case output
 }
 
+protocol TranslationBoxProtocol: AnyObject {
+    func translationBoxDidChangeText(text: String)
+}
+
 class TranslationBoxView: UIView {
     
+    private weak var delegate: TranslationBoxProtocol?
     private let mode: TranslationBoxMode
         
     private let languageButton = {
-        $0.setTitle("English (USA)", for: .normal)
         $0.setTitleColor(.black, for: .normal)
         $0.titleLabel?.font = .systemFont(ofSize: 12)
         $0.translatesAutoresizingMaskIntoConstraints = false
@@ -37,19 +41,18 @@ class TranslationBoxView: UIView {
     }(UIButton())
     
     private let textView: UITextView = {
-        $0.text = "Enter your text"
         $0.backgroundColor = .clear
         $0.font = .systemFont(ofSize: 28, weight: .bold)
-        $0.textColor = .systemGray
+        $0.textColor = .black
         $0.translatesAutoresizingMaskIntoConstraints = false
         return $0
     }(UITextView())
     
 
-    init(delegate: UITextViewDelegate?, mode: TranslationBoxMode) {
+    init(mode: TranslationBoxMode, delegate: TranslationBoxProtocol?) {
         self.mode = mode
+        self.delegate = delegate
         super.init(frame: .zero)
-        textView.delegate = delegate
         setupUI()
     }
 
@@ -58,11 +61,12 @@ class TranslationBoxView: UIView {
     }
     
     private func setupUI() {
+        textView.delegate = self
         backgroundColor = .systemGray5
         layer.cornerRadius = 20
         clipsToBounds = true
         translatesAutoresizingMaskIntoConstraints = false
-        textView.isUserInteractionEnabled = (mode == .output) ? false : true
+        textView.isEditable = (mode == .output) ? false : true
 
         setupSubviews()
         
@@ -93,25 +97,33 @@ class TranslationBoxView: UIView {
         ])
     }
     
-    func updateText(_ text: String) {
-        textView.text = text
-    }
-    
-    func updateLanguageTitle(_ title: String) {
-        languageButton.setTitle(title, for: .normal)
-    }
-
-    func updatePlaceholder(_ text: String) {
-        if textView.textColor == .systemGray {
-            textView.text = text
-        }
-    }
-    
-    func setLanguageMenu(_ menu: UIMenu) {
+    //MARK: - public functions
+    func configureLanguageMenu(_ menu: UIMenu) {
         languageButton.menu = menu
         languageButton.showsMenuAsPrimaryAction = true
     }
-    
+    func setLanguageTitle(_ title: String) {
+        languageButton.setTitle(title, for: .normal)
+    }
+    func setText(_ text: String) {
+        textView.text = text
+    }
 }
 
+//MARK: - TextView delegate
+extension TranslationBoxView: UITextViewDelegate {
+    func textViewDidBeginEditing(_ textView: UITextView) {
+
+    }
+    
+    func textViewDidChange(_ textView: UITextView) {
+        guard mode == .input else { return }
+        delegate?.translationBoxDidChangeText(text: textView.text)
+
+    }
+    
+    func textViewDidEndEditing(_ textView: UITextView) {
+
+    }
+}
 
