@@ -12,4 +12,11 @@ protocol HomeViewInput: AnyObject {
     func updateInputLanguage(_ language: Language)
     func updateOutputLanguage(_ language: Language)
     func showTranslatedText(_ text: String)
+    func setFavouriteEnabled(_ enabled: Bool)
+
+    func setFavouriteTextToInputBox(text: String)
+    
+    func updateFavouriteButton(isFavourite: Bool)
+    
+    func reloadData()
 }

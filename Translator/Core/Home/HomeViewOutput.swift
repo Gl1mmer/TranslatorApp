@@ -9,7 +9,13 @@ import Foundation
 
 protocol HomeViewOutput {
     func viewIsReady()
+    
     func translate(text: String)
     func changeLanguage(of: TranslationBoxMode, to: Language)
-    func addTextToFavorite(text: String)
+    func toggleFavourite()
+    func getFavorite(at index: Int)
+    
+    //MARK: - for tableView
+    var numberOfItems: Int { get }
+    func item(at index: Int) -> Translation
 }

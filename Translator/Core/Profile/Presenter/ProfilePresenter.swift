@@ -51,24 +51,37 @@ class ProfilePresenter {
 extension ProfilePresenter: ProfileViewOutput {
     func checkAndSaveNewTextFor(_ field: UserField, text: String) {
         guard !text.isEmpty else {
-            udm.saveStringFor(key: field, value: text)
+            udm.saveStringFor(field: field, value: text)
             return
         }
         
         guard isValid(text, field: field) else {
-            let previousValue = udm.getStringFor(key: field)
+            let previousValue = udm.getStringFor(field: field)
             input?.showValidationError(for: field, previousValue: previousValue ?? "")
             return
         }
         
-        udm.saveStringFor(key: field, value: text)
+        udm.saveStringFor(field: field, value: text)
     }
     
     func getProfileDataFromDatabase() {
-        let name = udm.getStringFor(key: UserField.name) ?? ""
-        let surname = udm.getStringFor(key: UserField.surname) ?? ""
-        let number = udm.getStringFor(key: UserField.phoneNumber) ?? ""
+        let name = udm.getStringFor(field: UserField.name) ?? ""
+        let surname = udm.getStringFor(field: UserField.surname) ?? ""
+        let number = udm.getStringFor(field: UserField.phoneNumber) ?? ""
         input?.updateUIWithDataFromDB(name: name, surname: surname, phone: number)
+        let avatarURL = udm.getAvatarPhotoUrl()
+        if let avatarURL {
+            networkingServ.downloadImage(from: avatarURL) { res in
+                switch res {
+                case .success(let image):
+                    DispatchQueue.main.async {
+                        self.input?.updateImage(with: image)
+                    }
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        }
     }
     
     func getRandomImage() {

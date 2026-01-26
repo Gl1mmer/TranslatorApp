@@ -41,13 +41,22 @@ final class ProfileViewController: UIViewController {
         $0.translatesAutoresizingMaskIntoConstraints = false
         $0.addTarget(self, action: #selector(randomButtonTapped), for: .touchUpInside)
         return $0
-    }(UIButton())
+    }(UIButton(type: .system))
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         output.getProfileDataFromDatabase()
-        output.getRandomImage()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+            tap.cancelsTouchesInView = false
+            view.addGestureRecognizer(tap)
+
+        print(Bundle.main.object(forInfoDictionaryKey: "XCCONFIG_WORKS") ?? "nil")
+
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
 
     @objc private func randomButtonTapped() {
@@ -137,5 +146,6 @@ extension ProfileViewController: CustomTextFieldProtocol {
         output.checkAndSaveNewTextFor(field, text: data)
     }
 }
+
 
 

@@ -13,6 +13,7 @@ enum TranslationBoxMode {
 
 protocol TranslationBoxProtocol: AnyObject {
     func translationBoxDidChangeText(text: String)
+    func favouriteButtonTapped()
 }
 
 class TranslationBoxView: UIView {
@@ -37,6 +38,7 @@ class TranslationBoxView: UIView {
         $0.translatesAutoresizingMaskIntoConstraints = false
         $0.setContentHuggingPriority(.required, for: .horizontal)
         $0.setContentHuggingPriority(.required, for: .vertical)
+        $0.addTarget(self, action: #selector(favouriteButtonTapped), for: .touchUpInside)
         return $0
     }(UIButton())
     
@@ -48,8 +50,15 @@ class TranslationBoxView: UIView {
         return $0
     }(UITextView())
     
+    private let placeholderLabel: UILabel = {
+        $0.textColor = .lightGray
+        $0.font = .systemFont(ofSize: 28, weight: .bold)
+        $0.numberOfLines = 0
+        $0.translatesAutoresizingMaskIntoConstraints = false
+        return $0
+    }(UILabel())
 
-    init(mode: TranslationBoxMode, delegate: TranslationBoxProtocol?) {
+    init(mode: TranslationBoxMode, delegate: TranslationBoxProtocol? = nil) {
         self.mode = mode
         self.delegate = delegate
         super.init(frame: .zero)
@@ -69,12 +78,14 @@ class TranslationBoxView: UIView {
         textView.isEditable = (mode == .output) ? false : true
 
         setupSubviews()
+        updatePlaceholderVisibility()
         
     }
     
     private func setupSubviews() {
         addSubview(languageButton)
         addSubview(textView)
+        textView.addSubview(placeholderLabel)
 
         if mode == .input {
             addSubview(bookmarkButton)
@@ -94,9 +105,28 @@ class TranslationBoxView: UIView {
             textView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -67),
             textView.topAnchor.constraint(equalTo: topAnchor, constant: 62),
             textView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
+            
+            placeholderLabel.leadingAnchor.constraint(equalTo: textView.leadingAnchor, constant: 5),
+            placeholderLabel.trailingAnchor.constraint(equalTo: textView.trailingAnchor, constant: -5),
+            placeholderLabel.topAnchor.constraint(equalTo: textView.topAnchor, constant: 8),
+            placeholderLabel.bottomAnchor.constraint(lessThanOrEqualTo: textView.bottomAnchor, constant: -8)
+
         ])
+
     }
     
+    private func updatePlaceholderVisibility() {
+        let isTextEmpty = textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        placeholderLabel.isHidden = !isTextEmpty
+        if mode == .input {
+            bookmarkButton.isHidden = isTextEmpty
+        }
+    }
+    
+    @objc private func favouriteButtonTapped() {
+        delegate?.favouriteButtonTapped()
+    }
+
     //MARK: - public functions
     func configureLanguageMenu(_ menu: UIMenu) {
         languageButton.menu = menu
@@ -105,25 +135,33 @@ class TranslationBoxView: UIView {
     func setLanguageTitle(_ title: String) {
         languageButton.setTitle(title, for: .normal)
     }
+    func setPlaceholder(_ text: String) {
+        placeholderLabel.text = text
+        updatePlaceholderVisibility()
+    }
     func setText(_ text: String) {
         textView.text = text
+        updatePlaceholderVisibility()
+    }
+    func updateFavouriteButton(_ state: Bool) {
+        guard mode == .input else { return }
+        let imageName = state ? "bookmark.fill" : "bookmark"
+        bookmarkButton.setImage(UIImage(systemName: imageName), for: .normal)
+    }
+    func setFavouriteEnabled(_ enabled: Bool) {
+        bookmarkButton.isEnabled = enabled
+        bookmarkButton.tintColor = enabled ? .black : .systemGray4
     }
 }
 
 //MARK: - TextView delegate
 extension TranslationBoxView: UITextViewDelegate {
-    func textViewDidBeginEditing(_ textView: UITextView) {
-
-    }
-    
     func textViewDidChange(_ textView: UITextView) {
-        guard mode == .input else { return }
-        delegate?.translationBoxDidChangeText(text: textView.text)
-
-    }
-    
-    func textViewDidEndEditing(_ textView: UITextView) {
-
+        updatePlaceholderVisibility()
+        if mode == .input {
+            setFavouriteEnabled(false)
+            delegate?.translationBoxDidChangeText(text: textView.text)
+        }
     }
 }
 

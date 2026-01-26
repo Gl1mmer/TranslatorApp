@@ -16,13 +16,18 @@ struct ImageURL: Codable {
 //MARK: - PROTOCOL
 protocol PhotoServiceProtocol {
     func fetchRandomPhoto(completion: @escaping (Result<UIImage, Error>) -> ())
+    func downloadImage(from url: String, completion: @escaping (Result<UIImage, Error>)->Void)
+    
 }
 //MARK: - CLASS
 class UnsplashService: PhotoServiceProtocol {
-    let unsplashUrl = "https://api.unsplash.com/photos/random?client_id=VrJ3q28MCgH3cCsbrlBFPavv4lDt8WNm5rxrZfcAHU0"
+    private let api_key = APIKeys.unsplash
+
+    private let unsplashUrl = "https://api.unsplash.com/photos/random?client_id="
+    private let udm = UserDefManager()
 
     func fetchRandomPhoto(completion: @escaping (Result<UIImage, any Error>) -> ()) {
-        guard let url = URL(string: unsplashUrl) else {
+        guard let url = URL(string: unsplashUrl + api_key) else {
             completion(.failure("URL is invalid" as! Error))
             return
         }
@@ -34,8 +39,9 @@ class UnsplashService: PhotoServiceProtocol {
             }
             do {
                 let photoURL = try JSONDecoder().decode(ImageModel.self, from: data)
-                print(photoURL)
-                self.downloadImage(from: photoURL) { result in
+                let url = photoURL.urls.regular
+                self.udm.saveAvatarPhotoURL(url)
+                self.downloadImage(from: url) { result in
                     switch result {
                     case .success(let image):
                         completion(.success(image))
@@ -50,8 +56,8 @@ class UnsplashService: PhotoServiceProtocol {
 
     }
     
-    func downloadImage(from url: ImageModel, completion: @escaping (Result<UIImage, Error>)->Void) {
-        guard let url = URL(string: url.urls.regular) else {
+    func downloadImage(from url: String, completion: @escaping (Result<UIImage, Error>)->Void) {
+        guard let url = URL(string: url) else {
             completion(.failure("URL is invalid" as! Error))
             return
         }
