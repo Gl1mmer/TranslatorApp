@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol ProfileViewOutput {
+protocol ProfileViewOutput {    
     func getProfileDataFromDatabase()
     func getRandomImage()
     func checkAndSaveNewTextFor(_ field: UserField, text: String)

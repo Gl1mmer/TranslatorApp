@@ -8,10 +8,11 @@
 import UIKit
 
 final class HomeViewController: UIViewController {
-    
-    lazy var output: HomeViewOutput = HomePresenter(input: self)
+        
+    var output: HomeViewOutput!
     
     private lazy var translationInputView = TranslationBoxView(mode: .input, delegate: self)
+    
     private lazy var translationOutputView = TranslationBoxView(mode: .output, delegate: self)
     
     private let favouriteLabel: UILabel = {

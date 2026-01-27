@@ -11,19 +11,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         
-        
-        let homeNC = UINavigationController(rootViewController: HomeViewController())
-        
-        
-        let udm = UserDefManager()
-        let profileVC = ProfileViewController()
-        let ProfilePresenter = ProfilePresenter(input: profileVC, networkServ: UnsplashService(), userDefManager: udm)
-        profileVC.output = ProfilePresenter
+        let homeVC = Assembly.createHomeVC()
+        let homeNC = UINavigationController(rootViewController: homeVC)
+
+        let profileVC = Assembly.createProfileVC()
         let profileNC = UINavigationController(rootViewController: profileVC)
         
         homeNC.tabBarItem = UITabBarItem(

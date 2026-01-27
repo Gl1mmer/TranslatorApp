@@ -27,17 +27,24 @@ class HomePresenter {
     
     private var workItem: DispatchWorkItem?
     
-    private let translationService: TranslationServiceProtocol = MockTranslatorService()
-    private let coreDataMngr: CoreDataManagerProtocol = CoreDataManager()
-    private let udm: UserDefManagerProtocol = UserDefManager()
+    private let translationService: TranslationServiceProtocol
+    private let coreDataMngr: CoreDataManagerProtocol
+    private let udm: UserDefManagerProtocol
     
-    weak var input: HomeViewInput?
+    private weak var input: HomeViewInput?
     
-    init(input: HomeViewInput) {
+    init(input: HomeViewInput, translationService: TranslationServiceProtocol, coreDataMngr: CoreDataManagerProtocol, userDefMngr: UserDefManagerProtocol) {
         self.input = input
-        self.getSavedOrDefaultLangFor(type: .source)
-        self.getSavedOrDefaultLangFor(type: .target)
-        self.getSavedFavourites()
+        self.translationService = translationService
+        self.coreDataMngr = coreDataMngr
+        self.udm = userDefMngr
+        getSavedData()
+    }
+    
+    private func getSavedData() {
+        getSavedOrDefaultLangFor(type: .source)
+        getSavedOrDefaultLangFor(type: .target)
+        getSavedFavourites()
     }
     
     private func isFavourite(key: String) -> Bool {
@@ -117,7 +124,6 @@ class HomePresenter {
 }
 
 extension HomePresenter: HomeViewOutput {
-    
     var numberOfItems: Int {
         favouriteKeys.count
     }

@@ -42,7 +42,7 @@ final class ProfileViewController: UIViewController {
         $0.addTarget(self, action: #selector(randomButtonTapped), for: .touchUpInside)
         return $0
     }(UIButton(type: .system))
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()

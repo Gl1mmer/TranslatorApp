@@ -15,11 +15,11 @@ enum UserField: String {
 
 class ProfilePresenter {
     
-    weak var input: ProfileViewInput?
+    private weak var input: ProfileViewInput?
     private let networkingServ: PhotoServiceProtocol
     private let udm: UserDefManagerProtocol
     
-    init(input: ProfileViewInput?, networkServ: PhotoServiceProtocol, userDefManager: UserDefManagerProtocol) {
+    init(input: ProfileViewInput ,networkServ: PhotoServiceProtocol, userDefManager: UserDefManagerProtocol) {
         self.input = input
         self.networkingServ = networkServ
         self.udm = userDefManager
