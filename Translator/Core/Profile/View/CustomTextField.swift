@@ -7,6 +7,12 @@
 
 import UIKit
 
+enum UserField: String {
+    case name = "Name"
+    case surname = "Surname"
+    case phoneNumber = "Phone number"
+}
+
 protocol CustomTextFieldProtocol: AnyObject {
     func checkAndSaveFor(field: UserField, data: String)
 }

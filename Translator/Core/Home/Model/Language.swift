@@ -36,3 +36,9 @@ struct Language: Equatable {
         return getLanguages().first { $0.code == code }
     }
 }
+
+enum LanguageCodes: String {
+    case kazakh = "kk"
+    case russion = "ru"
+    case english = "en"
+}

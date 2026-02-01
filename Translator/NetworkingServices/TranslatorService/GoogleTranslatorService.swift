@@ -16,7 +16,7 @@ class GoogleTranslatorService: TranslationServiceProtocol {
 
     func translate(text: String, from: String, to: String, completion: @escaping (Result<String, Error>) -> Void) {
         guard let url = URL(string: "https://translation.googleapis.com/language/translate/v2?q=\(text)&target=\(to)&source=\(from)&key=\(googleApi)") else {
-            completion(.failure("URL is invalid" as! Error))
+            completion(.failure(ServiceError.invalidURL))
             return
         }
         
@@ -27,20 +27,11 @@ class GoogleTranslatorService: TranslationServiceProtocol {
             }
             do {
                 let translation = try JSONDecoder().decode(TranslationAPIModel.self, from: data)
-                print(translation.data.translations.first!.translatedText)
                 completion(.success(translation.data.translations.first!.translatedText))
             } catch {
-                completion(.failure(error))
+                completion(.failure(ServiceError.decodingFailed))
             }
         }.resume()
 
-    }
-}
-
-class MockTranslatorService: TranslationServiceProtocol {
-    var translationCnt = 0
-    func translate(text: String, from: String, to: String, completion: @escaping (Result<String, Error>) -> Void) {
-        translationCnt += 1;
-        completion(.success("Translated \(translationCnt)"))
     }
 }

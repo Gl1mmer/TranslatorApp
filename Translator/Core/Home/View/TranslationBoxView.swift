@@ -24,6 +24,8 @@ class TranslationBoxView: UIView {
     private let languageButton = {
         $0.setTitleColor(.black, for: .normal)
         $0.titleLabel?.font = .systemFont(ofSize: 12)
+        $0.setImage(UIImage(systemName: "chevron.up.chevron.down"), for: .normal)
+        $0.semanticContentAttribute = .forceRightToLeft
         $0.translatesAutoresizingMaskIntoConstraints = false
         $0.setContentHuggingPriority(.required, for: .horizontal)
         $0.setContentHuggingPriority(.required, for: .vertical)

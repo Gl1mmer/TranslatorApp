@@ -7,11 +7,7 @@
 
 import Foundation
 
-enum LanguageCodes: String {
-    case kazakh = "kk"
-    case russion = "ru"
-    case english = "en"
-}
+
 
 class HomePresenter {
     

@@ -5,13 +5,7 @@
 //  Created by Amankeldi Zhetkergen on 20.12.2025.
 //
 
-import Foundation
-
-enum UserField: String {
-    case name = "Name"
-    case surname = "Surname"
-    case phoneNumber = "Phone number"
-}
+import UIKit
 
 class ProfilePresenter {
     
@@ -45,6 +39,22 @@ class ProfilePresenter {
         let matches = detector?.matches(in: text, options: [], range: range)
         return matches?.first?.resultType == .phoneNumber
     }
+    
+    private func loadImage(from url: String) {
+        networkingServ.downloadImage(from: url) { [weak self] res in
+            guard let self else { return }
+            switch res {
+            case .success(let data):
+                if let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self.input?.updateImage(with: image)
+                    }
+                }
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
+    }
 
 }
 
@@ -71,26 +81,17 @@ extension ProfilePresenter: ProfileViewOutput {
         input?.updateUIWithDataFromDB(name: name, surname: surname, phone: number)
         let avatarURL = udm.getAvatarPhotoUrl()
         if let avatarURL {
-            networkingServ.downloadImage(from: avatarURL) { res in
-                switch res {
-                case .success(let image):
-                    DispatchQueue.main.async {
-                        self.input?.updateImage(with: image)
-                    }
-                case .failure(let error):
-                    print(error.localizedDescription)
-                }
-            }
+            loadImage(from: avatarURL)
         }
     }
     
     func getRandomImage() {
-        networkingServ.fetchRandomPhoto { result in
+        networkingServ.fetchRandomPhotoUrl { [weak self] result in
+            guard let self else {return}
             switch result {
-            case .success(let image):
-                DispatchQueue.main.async {
-                    self.input?.updateImage(with: image)
-                }
+            case .success(let url):
+                self.udm.saveAvatarPhotoURL(url)
+                self.loadImage(from: url)
             case .failure(let error):
                 print(error.localizedDescription)
             }
