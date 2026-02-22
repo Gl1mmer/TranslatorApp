@@ -27,6 +27,7 @@ final class PersistentController {
         container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
         container.viewContext.automaticallyMergesChangesFromParent = true
     }
+    
     func saveContext() {
         let context = container.viewContext
         guard context.hasChanges else { return }

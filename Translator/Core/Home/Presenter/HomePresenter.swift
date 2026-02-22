@@ -7,8 +7,6 @@
 
 import Foundation
 
-
-
 class HomePresenter {
     
     private let availableLanguages: [Language] = Language.getLanguages()

@@ -25,7 +25,6 @@ final class CoreDataManager: CoreDataManagerProtocol {
         self.storage = storage
     }
     
-    
     func loadFavourites() -> [Translation] {
         let request: NSFetchRequest<CDTranslation> = CDTranslation.fetchRequest()
         

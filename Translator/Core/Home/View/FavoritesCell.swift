@@ -54,6 +54,7 @@ class FavoritesCell: UITableViewCell {
         NSLayoutConstraint.activate([
             mainLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
             mainLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
+            mainLabel.trailingAnchor.constraint(equalTo: moreButton.leadingAnchor, constant: -8),
             
             secondaryLabel.topAnchor.constraint(equalTo: mainLabel.bottomAnchor, constant: 4),
             secondaryLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),

@@ -12,7 +12,6 @@ final class HomeViewController: UIViewController {
     var output: HomeViewOutput!
     
     private lazy var translationInputView = TranslationBoxView(mode: .input, delegate: self)
-    
     private lazy var translationOutputView = TranslationBoxView(mode: .output, delegate: self)
     
     private let favouriteLabel: UILabel = {
@@ -32,14 +31,20 @@ final class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationItem.title = "DevHouse iOS"
-        setupUI()
-        output.viewIsReady()
-        
-        favouriteTableView.dataSource = self
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+                image: UIImage(systemName: "camera.viewfinder"),
+                style: .plain,
+                target: self,
+                action: #selector(openCamera)
+            )
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
             tap.cancelsTouchesInView = false
             view.addGestureRecognizer(tap)
+
+        setupUI()
+        output.viewIsReady()
+        favouriteTableView.dataSource = self
     }
     
     @objc private func dismissKeyboard() {
@@ -147,5 +152,29 @@ extension HomeViewController: UITableViewDataSource {
 extension HomeViewController: FavoritesCellProtocol {
     func didTapOpen(at index: Int) {
         output.getFavorite(at: index)
+    }
+}
+
+extension HomeViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    @objc private func openCamera() {
+        let picker = UIImagePickerController()
+        picker.sourceType = .photoLibrary
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]
+    ) {
+
+        picker.dismiss(animated: true)
+
+        guard let image = info[.originalImage] as? UIImage else { return }
+        TextRecognizer.recognize(from: image) { [weak self] detectedText in
+            guard let self else { return }
+            self.translationInputView.setText(detectedText)
+            self.output.translate(text: detectedText)
+            
+        }
     }
 }

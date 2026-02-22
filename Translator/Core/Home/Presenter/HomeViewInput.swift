@@ -14,7 +14,7 @@ protocol HomeViewInput: AnyObject {
     func showTranslatedText(_ text: String)
     func setFavouriteEnabled(_ enabled: Bool)
 
-    func setFavouriteTextToInputBox(text: String)
+    func setFavouriteTextToInputBox(text: String) // just setInputBoxText
     
     func updateFavouriteButton(isFavourite: Bool)
     
